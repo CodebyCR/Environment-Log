@@ -16,6 +16,26 @@
 #include <optional>
 #include <memory>
 
+namespace LogColor{ // Test
+    constexpr std::string_view Red = "\033[0;31m";
+
+
+    struct ColorToggle{
+    private:
+        std::string_view color;
+
+    public:
+        explicit ColorToggle(std::string_view color) : color(color) {}
+
+        auto operator()(const bool colorized) -> std::string_view {
+            return colorized ? color : "";
+        }
+    };
+
+    ColorToggle redToggle(Red);
+    auto result = redToggle(true);
+}
+
 namespace Log {
     enum class LogLevel : std::uint8_t {
         /// Show all log levels
@@ -36,6 +56,7 @@ namespace Log {
             std::string dateFormat;
             std::string timeFormat;
             LogLevel logLevel;
+            bool colorize;
         };
 
         class Log {
@@ -97,7 +118,8 @@ namespace Log {
                     .logDirectory = std::filesystem::current_path() / "logs",
                     .dateFormat = "%d. %b %Y",
                     .timeFormat = "%T",
-                    .logLevel = LogLevel::INFO
+                    .logLevel = LogLevel::INFO,
+                    .colorize = true
             }) : envConfig(envConfig), logPool(envConfig.logDirectory) {
                 std::cout << "test print" << std::endl;
             }
@@ -136,10 +158,44 @@ namespace Log {
 //            }
 
 
+
+
+            auto error(std::string_view logInfo,
+                       std::vector<std::string_view> const& arguments = {},
+                       std::optional<std::source_location> caller = std::nullopt) -> void {
+                const std::string info = interpolateArgs(logInfo, arguments);
+                constexpr std::string_view Error = "ERROR";
+                constexpr std::string_view Red = "\033[0;31m";
+                constexpr std::string_view Reset = "\033[0m";
+
+                auto stream = std::stringstream();
+                stream << "[ " << Red << Error  << ' ';
+//                stream = getTimestamp(stream);
+
+                const std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+                /// now as dd. MMM yyyy hh:mm:ss
+                const time_t nowTime = std::chrono::system_clock::to_time_t(now);
+
+                const auto totalDateFormat = "| " + envConfig.timeFormat + " | " + envConfig.dateFormat;
+                stream << std::put_time(localtime(&nowTime), totalDateFormat.c_str());
+
+                if (caller.has_value()) {
+                    const auto filename = std::filesystem::path(caller->file_name()).filename().c_str();
+                    stream << " | " << filename << ':' << caller->line()
+                           << " (" << caller->line() << ':' << caller->column() << ")";
+                }
+
+                stream << Reset << " ] -> " << info << std::endl;
+
+                std::cout << stream.str();
+            }
+
+
             template<typename ...Args>
             auto print(std::string_view logInfo,
                        std::vector<std::string_view> const& arguments = {},
-                       std::optional<std::source_location> caller  = std::nullopt) -> void {
+                       std::optional<std::source_location> caller = std::nullopt) -> void {
+
                 const std::string info = interpolateArgs(logInfo, arguments);
                 constexpr std::string_view Info = "INFO";
 

@@ -2,6 +2,7 @@
 #include "EnviormentLog.hpp"
 #include "testHeader.hpp"
 
+
 #include <iostream>
 #include <string>
 
@@ -19,8 +20,11 @@ int main() {
 
     log.print(__FILE_NAME__);
 
-    test_space::TestClass testClass;
+    log.error("test error");
 
+    log.print("test print");
+
+    test_space::TestClass testClass;
 
 
 

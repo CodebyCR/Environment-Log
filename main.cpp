@@ -1,6 +1,10 @@
 
-#include "EnviormentLog.hpp"
+
 #include "testHeader.hpp"
+
+
+
+#include "EnviormentLog/LogStream.hpp"
 
 
 #include <iostream>
@@ -11,7 +15,7 @@ int main() {
     std::string logPath = std::filesystem::current_path() / "logs";
     std::cout << "Log to: " << logPath << std::endl;
 
-    auto log = Log::EnviormentLog();
+    auto log = EnvironmentLog();
     log.print("Hello ${0} ${1}",
               {"World", "!"},
               std::source_location::current());
@@ -26,6 +30,15 @@ int main() {
 
     test_space::TestClass testClass;
 
+
+
+    LogStream logStream2 = LogStream::create(true, LogLevel::INFO);
+    logStream2 << LogLevel::ERROR << " test error" << std::endl;
+    logStream2 << LogLevel::INFO << " test info" << std::endl;
+
+    LogStream logStream3 = LogStream::create(true, LogLevel::ERROR);
+    logStream3 << LogLevel::ERROR << " test error" << std::endl;
+    logStream3 << LogLevel::INFO << " test info" << std::endl;
 
 
 

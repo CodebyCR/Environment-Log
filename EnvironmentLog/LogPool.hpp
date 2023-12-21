@@ -33,7 +33,7 @@ public:
             return std::nullopt;
         }
 
-        return std::make_optional<Log>(Log(logPath));
+        return {Log(logPath)};
     }
 
     /// Try to create a new log, if it does not exist.

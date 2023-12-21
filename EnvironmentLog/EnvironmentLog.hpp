@@ -158,7 +158,8 @@ auto print( std::string_view logInfo,
 }
 
 // TODO: skip logentry if loglevel is lower than loglevel of the log
-// add one private methode for logentry to logstream
+// add one private methode for logentry
+// logentry to logstream overload
 // add togglebar color
 // add togglebar loglevel
 // add missing loglevels

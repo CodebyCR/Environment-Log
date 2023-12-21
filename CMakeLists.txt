@@ -9,7 +9,7 @@ set(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_
 
 project(EnvironmentLogBinary
         VERSION ${PROJECT_VERSION}
-        DESCRIPTION "A log tool for the whole enviorment."
+        DESCRIPTION "A log tool for the whole environment."
         LANGUAGES CXX)
 
 message(NOTICE "${PROJECT_NAME}: ${PROJECT_VERSION}")

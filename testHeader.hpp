@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "EnviormentLog/EnviormentLog.hpp"
+#include "EnvironmentLog/EnvironmentLog.hpp"
 #include <iostream>
 
 namespace test_space{
@@ -13,7 +13,7 @@ namespace test_space{
         TestClass() {
             std::cout << "TestClass created" << std::endl;
 
-            auto log = EnviormentLog();
+            auto log = EnvironmentLog();
             log.print("Hello ${0} ${1}",{"World", "!"},std::source_location::current());
         }
     };

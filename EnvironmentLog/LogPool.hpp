@@ -19,7 +19,7 @@ private:
     std::filesystem::path logDirectory;
 
 public:
-    LogPool(std::filesystem::path const &logDirectory) : logDirectory(logDirectory) {
+    explicit LogPool(std::filesystem::path const &logDirectory) : logDirectory(logDirectory) {
         if (!std::filesystem::exists(logDirectory)) {
             std::filesystem::create_directory(logDirectory);
         }
@@ -44,7 +44,7 @@ public:
             std::filesystem::create_directory(logPath);
         }
         this->insert(std::make_pair(logPath, Log(logPath)));
-        return std::optional<Log>(this->at(logPath));
+        return {this->at(logPath)};
     }
 };
 

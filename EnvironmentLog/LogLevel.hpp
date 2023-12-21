@@ -5,6 +5,7 @@
 #pragma once
 
 #include <iostream>
+#include <cstdint>
 
 enum class LogLevel : std::uint8_t {
     /// Show all log levels

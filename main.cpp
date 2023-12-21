@@ -4,15 +4,16 @@
 
 
 
-#include "EnviormentLog/LogStream.hpp"
+#include "EnvironmentLog/LogStream.hpp"
+#include "EnvironmentLog/EnvironmentLog.hpp"
 
 
 #include <iostream>
-#include <string>
+#include <filesystem>
 
 
 int main() {
-    std::string logPath = std::filesystem::current_path() / "logs";
+    std::filesystem::path logPath = std::filesystem::current_path() / "logs";
     std::cout << "Log to: " << logPath << std::endl;
 
     auto log = EnvironmentLog();

@@ -6,7 +6,8 @@ set(LOG_SOURCES
         "LogStream.hpp"
         "LogPool.hpp"
         "Log.hpp"
-        "EnvironmentLog.hpp")
+        "EnvironmentLog.hpp"
+        "LogEntry.hpp")
 
 add_library(${LOG_LIBRARY} INTERFACE ${LOG_SOURCES} )
 

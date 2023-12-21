@@ -52,7 +52,7 @@ private:
 
 public:
 
-    EnvironmentLog(EnvConfig const& envConfig = {
+    explicit EnvironmentLog(EnvConfig const& envConfig = {
             .logDirectory = std::filesystem::current_path() / "logs",
             .dateFormat = "%d. %b %Y",
             .timeFormat = "%T",
@@ -69,11 +69,11 @@ auto createLog(std::string_view logDirectory) -> std::optional<Log> {
     return logPool.createLog(logDirectory);
 }
 
-auto interpolateArgs(std::string_view logInfo,
+static auto interpolateArgs(std::string_view logInfo,
                      const std::vector<std::string_view> &arguments) -> std::string {
     std::string info = logInfo.data();
 
-    for(int8_t index = 0; index < arguments.size(); index++) {
+    for(std::uint32_t index = 0; index < arguments.size(); index++) {
         const std::regex pattern ("\\$\\{" + std::to_string(index) + "\\}");
         const std::string replacement(arguments[index]);
         info = std::regex_replace(info, pattern , replacement);
@@ -99,7 +99,7 @@ auto interpolateArgs(std::string_view logInfo,
 
 auto error( std::string_view logInfo,
             std::vector<std::string_view> const& arguments = {},
-            std::optional<std::source_location> caller = std::nullopt) -> void {
+            std::optional<std::source_location> caller = std::nullopt) const -> void {
     const std::string info = interpolateArgs(logInfo, arguments);
     constexpr std::string_view Error = "ERROR";
     constexpr std::string_view Red = "\033[0;31m";
@@ -117,7 +117,7 @@ auto error( std::string_view logInfo,
     stream << std::put_time(localtime(&nowTime), totalDateFormat.c_str());
 
     if (caller.has_value()) {
-        const auto filename = std::filesystem::path(caller->file_name()).filename().c_str();
+        const auto filename = std::filesystem::path(caller->file_name()).filename();
         stream << " | " << filename << ':' << caller->line()
                << " (" << caller->line() << ':' << caller->column() << ")";
     }
@@ -144,10 +144,11 @@ auto print( std::string_view logInfo,
     /// now as dd. MMM yyyy hh:mm:ss
     const time_t nowTime = std::chrono::system_clock::to_time_t(now);
     const auto totalDateFormat = "| " + envConfig.timeFormat +  " | " + envConfig.dateFormat;
+
     stream << std::put_time(localtime(&nowTime), totalDateFormat.c_str());
 
     if(caller.has_value()){
-        const auto filename = std::filesystem::path(caller->file_name()).filename().c_str();
+        const auto filename = std::filesystem::path(caller->file_name()).filename();
         stream <<  " | " << filename <<  ':' << caller->line()
                 << " (" << caller->line() << ':' << caller->column() << ")";
     }

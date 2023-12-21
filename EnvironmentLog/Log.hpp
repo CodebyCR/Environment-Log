@@ -6,6 +6,7 @@
 
 
     #include <filesystem>
+    #include <utility>
 
 
     class Log {
@@ -13,7 +14,7 @@
         std::filesystem::path logPath;
 
     public:
-        Log(std::filesystem::path const &logPath) : logPath(logPath) {}
+        explicit Log(std::filesystem::path logPath) : logPath(std::move(logPath)) {}
 
         /// create dirfrent kinds of log entries here...
     };

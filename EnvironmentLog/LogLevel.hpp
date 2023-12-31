@@ -70,6 +70,15 @@ inline constexpr LogLevel operator|(LogLevel const& lhs, LogLevel const& rhs){
     return static_cast<LogLevel>(static_cast<std::uint8_t>(lhs) | static_cast<std::uint8_t>(rhs));
 }
 
+inline constexpr auto operator >= (LogLevel lhs, LogLevel rhs) -> bool {
+    return static_cast<std::uint8_t>(lhs) >= static_cast<std::uint8_t>(rhs);
+}
+
+inline constexpr auto operator <= (LogLevel lhs, LogLevel rhs) -> bool {
+    return static_cast<std::uint8_t>(lhs) <= static_cast<std::uint8_t>(rhs);
+}
+
+
 inline constexpr std::string_view getColor(LogLevel const logLevel){
     switch (logLevel) {
         case LogLevel::DEBUG:

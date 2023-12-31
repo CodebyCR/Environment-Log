@@ -5,6 +5,7 @@
 #pragma once
 
 #include "LogLevel.hpp"
+#include "LogEntry.hpp"
 
 #include <iostream>
 
@@ -22,7 +23,7 @@ private:
 
     /// LogLevel filter
     inline auto logLevelFilter(LogLevel logLevel) -> bool {
-        return logLevel >= displayedLogLevel;
+        return logLevel <= displayedLogLevel;
     }
 
     /// Colorize
@@ -31,7 +32,9 @@ private:
 public:
 
     /// Singleton
-    static auto create(const bool colorize, const LogLevel displayedLogLevel, std::ostream &stream = std::cout) -> LogStream& {
+    static auto create(const bool colorize = true,
+                       const LogLevel displayedLogLevel = LogLevel::INFO,
+                       std::ostream &stream = std::cout) -> LogStream& {
         static LogStream logStream = LogStream(colorize, displayedLogLevel, stream);
         return logStream;
     }
@@ -127,5 +130,15 @@ public:
             stream << logLevel;
 //        }
         return *this;
+    }
+
+    auto operator << (LogEntry const& logEntry) -> std::ostream & {
+        bool logFilterFit = logLevelFilter(logEntry.logLevel);
+
+        if(logFilterFit){
+            // TODO: Colorize ???
+            stream  << logEntry.message;
+        }
+        return stream;
     }
 };

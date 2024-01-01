@@ -20,148 +20,141 @@
 #include <sstream>
 #include <optional>
 #include <memory>
-
-namespace LogColor { // Test
-    constexpr std::string_view Red = "\033[0;31m";
-}
-
-//struct ColorToggle{
-//private:
-//std::string_view color;
-//
-//public:
-//explicit ColorToggle(std::string_view color) : color(color) {}
-//
-//auto operator()(const bool colorized) -> std::string_view {
-//    return colorized ? color : "";
-//}
-//};
-//
-//ColorToggle redToggle(Red);
-//auto result = redToggle(true);
-//}
-
-
+#include <cstdarg>
 
 class EnvironmentLog {
 private:
     EnvConfig envConfig;
     LogPool logPool;
-    LogStream logStream = LogStream::create(envConfig.colorize, envConfig.logLevel);
+    LogStream logStream = LogStream::create(envConfig);
 
+    static auto interpolateArgs(std::string_view logInfo,
+                                std::vector<std::string_view> const &arguments) -> std::string {
+        std::string info = logInfo.data();
+
+        for (std::uint32_t index = 0; index < arguments.size(); index++) {
+            const std::regex pattern("\\$\\{" + std::to_string(index) + "\\}");
+            const std::string replacement(arguments[index]);
+            info = std::regex_replace(info, pattern, replacement);
+        }
+        return info;
+    }
 
 public:
 
-    explicit EnvironmentLog(EnvConfig const& envConfig = {
+    explicit EnvironmentLog(EnvConfig const &envConfig = {
             .logDirectory = std::filesystem::current_path() / "logs",
             .dateFormat = "%d. %b %Y",
             .timeFormat = "%T",
-            .logLevel = LogLevel::INFO,
-            .colorize = true
-    }) : envConfig(envConfig), logPool(envConfig.logDirectory) {
+            .displayedLogLevel = LogLevel::INFO,
+            .colorize = true,
+            .stream = std::cout
+    }) : envConfig(envConfig), logPool(envConfig.logDirectory) {}
+
+    auto getLog(std::string_view logSubDirectory) -> std::optional<Log> {
+        return logPool.getLog(logSubDirectory);
     }
 
-auto getLog(std::string_view logSubDirectory) -> std::optional<Log> {
-    return logPool.getLog(logSubDirectory);
-}
-
-auto createLog(std::string_view logDirectory) -> std::optional<Log> {
-    return logPool.createLog(logDirectory);
-}
-
-static auto interpolateArgs(std::string_view logInfo,
-                     const std::vector<std::string_view> &arguments) -> std::string {
-    std::string info = logInfo.data();
-
-    for(std::uint32_t index = 0; index < arguments.size(); index++) {
-        const std::regex pattern ("\\$\\{" + std::to_string(index) + "\\}");
-        const std::string replacement(arguments[index]);
-        info = std::regex_replace(info, pattern , replacement);
-    }
-    return info;
-}
-
-//            auto currentSource(std::stringstream& stream,
-//                               std::optional<std::source_location> const& caller) -> std::string {
-//
-//
-//                return stream.str();
-//            }
-
-//            inline auto getTimestamp(std::stringstream& stream,) -> std::stringstream  {
-//
-//
-//                return stream;
-//            }
-
-
-
-
-auto error( std::string_view logInfo,
-            std::vector<std::string_view> const& arguments = {},
-            std::optional<std::source_location> caller = std::nullopt) const -> void {
-    const std::string info = interpolateArgs(logInfo, arguments);
-    constexpr std::string_view Error = "ERROR";
-    constexpr std::string_view Red = "\033[0;31m";
-    constexpr std::string_view Reset = "\033[0m";
-
-    auto stream = std::stringstream();
-    stream << "[ " << Red << Error  << ' ';
-//                stream = getTimestamp(stream);
-
-    const std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-    /// now as dd. MMM yyyy hh:mm:ss
-    const time_t nowTime = std::chrono::system_clock::to_time_t(now);
-
-    const auto totalDateFormat = "| " + envConfig.timeFormat + " | " + envConfig.dateFormat;
-    stream << std::put_time(localtime(&nowTime), totalDateFormat.c_str());
-
-    if (caller.has_value()) {
-        const auto filename = std::filesystem::path(caller->file_name()).filename();
-        stream << " | " << filename << ':' << caller->line()
-               << " (" << caller->line() << ':' << caller->column() << ")";
+    auto createLog(std::string_view logDirectory) -> std::optional<Log> {
+        return logPool.createLog(logDirectory);
     }
 
-    stream << Reset << " ] -> " << info << std::endl;
+    auto print(std::string_view logInfo,
+               std::vector<std::string_view> const &arguments = {},
+               std::optional<std::source_location> caller = std::nullopt) -> void {
 
-    std::cout << stream.str();
-}
+        const std::string info = interpolateArgs(logInfo, arguments);
 
+        const LogEntry logEntry = {
+                .logLevel = LogLevel::INFO,
+                .message =  info,
+                .location = caller
+        };
 
-template<typename ...Args>
-auto print( std::string_view logInfo,
-            std::vector<std::string_view> const& arguments = {},
-            std::optional<std::source_location> caller = std::nullopt) -> void {
-
-    const std::string info = interpolateArgs(logInfo, arguments);
-    constexpr std::string_view Info = "INFO";
-
-    auto stream = std::stringstream();
-    stream << "[ " << Info << ' ';
-//                stream = getTimestamp(stream);
-
-    const std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-    /// now as dd. MMM yyyy hh:mm:ss
-    const time_t nowTime = std::chrono::system_clock::to_time_t(now);
-    const auto totalDateFormat = "| " + envConfig.timeFormat +  " | " + envConfig.dateFormat;
-
-    stream << std::put_time(localtime(&nowTime), totalDateFormat.c_str());
-
-    if(caller.has_value()){
-        const auto filename = std::filesystem::path(caller->file_name()).filename();
-        stream <<  " | " << filename <<  ':' << caller->line()
-                << " (" << caller->line() << ':' << caller->column() << ")";
+        logStream << logEntry;
     }
 
-    stream  << " ] -> " << info << std::endl;
-    std::cout << stream.str();
-}
 
-// TODO: skip logentry if loglevel is lower than loglevel of the log
-// add one private methode for logentry
-// logentry to logstream overload
-// add togglebar color
-// add togglebar loglevel
+    template<typename... Args>
+    auto print(std::string_view logInfo, Args... args) -> void {
+        std::vector<std::string_view> arguments{args...};
+        print(logInfo, arguments);
+    }
+
+    auto info(std::string_view logInfo,
+              std::vector<std::string_view> const &arguments = {},
+              std::optional<std::source_location> caller = std::nullopt) -> void {
+
+        print(logInfo, arguments, caller);
+    }
+
+    auto debug(std::string_view logInfo,
+               std::vector<std::string_view> const &arguments = {},
+               std::optional<std::source_location> caller = std::nullopt) -> void {
+
+        const std::string info = interpolateArgs(logInfo, arguments);
+
+        const LogEntry logEntry = {
+                .logLevel = LogLevel::DEBUG,
+                .message =  info,
+                .location = caller
+        };
+
+        logStream << logEntry;
+    }
+
+    auto warning(std::string_view message,
+                 std::vector<std::string_view> const &arguments = {},
+                 std::optional<std::source_location> caller = std::nullopt) -> void {
+
+        const std::string info = interpolateArgs(message, arguments);
+
+        const LogEntry logEntry = {
+                .logLevel = LogLevel::WARNING,
+                .message =  info,
+                .location = caller
+        };
+
+        logStream << logEntry;
+    }
+
+    auto error(std::string_view message,
+               std::vector<std::string_view> const &arguments = {},
+               std::optional<std::source_location> caller = std::nullopt) -> void {
+
+        const std::string info = interpolateArgs(message, arguments);
+
+        const LogEntry logEntry = {
+                .logLevel = LogLevel::ERROR,
+                .message =  info,
+                .location = caller
+        };
+
+        logStream << logEntry;
+    }
+
+    auto fatal(std::string_view message,
+               std::vector<std::string_view> const &arguments = {},
+               std::optional<std::source_location> caller = std::nullopt) -> void {
+
+        const std::string info = interpolateArgs(message, arguments);
+
+        const LogEntry logEntry = {
+                .logLevel = LogLevel::FATAL,
+                .message =  info,
+                .location = caller
+        };
+
+        logStream << logEntry;
+    }
+
+
+// TODO:
+//  ~~skip logentry if loglevel is lower than loglevel of the log~~
+//  ~~add one private methode for logentry~~
+//  ~~logentry to logstream overload~~
+//  ~~add togglebar color~~
+//  ~~add togglebar loglevel~~
 // add missing loglevels
 // add & get sub logs
 

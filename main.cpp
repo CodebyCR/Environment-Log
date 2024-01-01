@@ -20,8 +20,9 @@ int main() {
         .logDirectory = logPath,
         .dateFormat = "%d. %b %Y",
         .timeFormat = "%T",
-        .logLevel = LogLevel::ERROR,
-        .colorize = true
+        .displayedLogLevel = LogLevel::INFO,
+        .colorize = true,
+        .stream = std::cout
     });
 
 
@@ -41,34 +42,17 @@ int main() {
     test_space::TestClass testClass;
 
 
-
-    LogStream logStream2 = LogStream::create();
-    logStream2 << std::endl;
-    logStream2 << std::endl;
-
-
-
-    LogEntry testEntry = {
-            .logLevel = LogLevel::ERROR,
-            .message = "test error message"
-    };
-
-    LogEntry testEntry2 = {
-            .logLevel = LogLevel::INFO,
-            .message = "test info message"
-    };
-//            .sourceLocation = std::source_location::current()
-//    };
-
-    logStream2 << "Test ausgabe 1: " << testEntry << std::endl;
-    logStream2 << "Test ausgabe 2: " << testEntry2 << std::endl;
-
-
-    LogStream logStream3 = LogStream::create();
-    logStream3 << "Test ausgabe 3: " << testEntry << std::endl;
-    logStream3 << "Test ausgabe 4: " << testEntry2 << std::endl;
-
     // Colorized for individual log or MutltiStream
+
+    log.print("-- Hello ${0} ${1} --","World", "!");
+//    log.print("with source location", std::source_location::current());
+
+    log.debug("Test ausgabe 1: Test debug");
+    log.print("Test ausgabe 2: Test print");
+    log.info("Test ausgabe 2: Test info");
+    log.warning("Test ausgabe 3: Test warning");
+    log.error("Test ausgabe 4: Test error");
+    log.fatal("Test ausgabe 5: Test fatal");
 
 
     return 0;

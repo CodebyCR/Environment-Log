@@ -78,20 +78,23 @@ inline constexpr auto operator <= (LogLevel lhs, LogLevel rhs) -> bool {
     return static_cast<std::uint8_t>(lhs) <= static_cast<std::uint8_t>(rhs);
 }
 
+namespace LogLevelHelper {
 
-inline constexpr std::string_view getColor(LogLevel const logLevel){
-    switch (logLevel) {
-        case LogLevel::DEBUG:
-            return "\033[0;37m";
-        case LogLevel::INFO:
-            return "\033[0;32m";
-        case LogLevel::WARNING:
-            return "\033[0;33m";
-        case LogLevel::ERROR:
-            return "\033[0;31m";
-        case LogLevel::FATAL:
-            return "\033[0;35m";
+    inline constexpr std::string_view getColor(LogLevel const logLevel) {
+        switch (logLevel) {
+            case LogLevel::DEBUG:
+                return "\033[0;37m";
+            case LogLevel::INFO:
+                return "\033[0;32m";
+            case LogLevel::WARNING:
+                return "\033[0;33m";
+            case LogLevel::ERROR:
+                return "\033[0;31m";
+            case LogLevel::FATAL:
+                return "\033[0;35m";
+        }
     }
+
+    constexpr std::string_view COLOR_RESET = "\033[0m";
+
 }
-
-

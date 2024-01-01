@@ -14,6 +14,7 @@ public:
     std::filesystem::path logDirectory;
     std::string dateFormat;
     std::string timeFormat;
-    LogLevel logLevel;
+    LogLevel displayedLogLevel;
     bool colorize;
+    std::ostream& stream;
 };

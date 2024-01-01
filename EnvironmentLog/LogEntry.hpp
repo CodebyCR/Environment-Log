@@ -8,12 +8,13 @@
 
 #include <iostream>
 #include <string_view>
+#include <source_location>
 
 struct LogEntry{
 public:
     LogLevel logLevel;
     std::string_view message;
-
+    std::optional<std::source_location> location;
 };
 
 

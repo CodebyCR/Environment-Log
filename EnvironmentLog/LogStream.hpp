@@ -11,31 +11,71 @@
 
 class LogStream {
 private:
-    bool colorize;
-    LogLevel displayedLogLevel;
+    EnvConfig envConfig;
     std::ostream &stream;
 
 
-    LogStream(bool colorize, LogLevel displayedLogLevel, std::ostream &stream = std::cout):
-            colorize(colorize),
-            displayedLogLevel(displayedLogLevel),
-            stream(stream)  {}
+    LogStream(EnvConfig const& envConfig):
+            envConfig(envConfig),
+            stream(envConfig.stream)  {}
 
     /// LogLevel filter
     inline auto logLevelFilter(LogLevel logLevel) -> bool {
-        return logLevel <= displayedLogLevel;
+        return logLevel <= envConfig.displayedLogLevel;
     }
 
-    /// Colorize
+
+
+    /// Timestamp
+    inline auto addTimestamp() -> LogStream & {
+        const std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+        /// now as dd. MMM yyyy hh:mm:ss
+        const time_t nowTime = std::chrono::system_clock::to_time_t(now);
+        const auto totalDateFormat = "| " + envConfig.timeFormat +  " | " + envConfig.dateFormat;
+
+        stream << std::put_time(localtime(&nowTime), totalDateFormat.c_str());
+        return *this;
+    }
+
+    /// Source location
+    inline auto addSourcelocation(std::source_location const& location) -> LogStream & {
+        const auto filename = std::filesystem::path(location.file_name()).filename();
+        stream << " | " << filename << ':' << location.line()
+               << " (" << location.line() << ':' << location.column() << ')';
+        return *this;
+    }
+
+    inline auto printEntryHeader(LogEntry const& logEntry) -> LogStream & {
+        stream << "[ " << logEntry.logLevel << ' ';
+        addTimestamp();
+
+        if(logEntry.location.has_value()){
+            addSourcelocation(logEntry.location.value());
+        }
+
+        stream << " ] -> ";
+        return *this;
+    }
+
+    /// Colorized
+    inline auto printColorizedEntryHeader(LogEntry const& logEntry) -> LogStream & {
+        stream << "[ " << LogLevelHelper::getColor(logEntry.logLevel) << logEntry.logLevel << ' ';
+        addTimestamp();
+
+        if(logEntry.location.has_value()){
+            addSourcelocation(logEntry.location.value());
+        }
+
+        stream << LogLevelHelper::COLOR_RESET << " ] -> ";
+        return *this;
+    }
 
 
 public:
 
     /// Singleton
-    static auto create(const bool colorize = true,
-                       const LogLevel displayedLogLevel = LogLevel::INFO,
-                       std::ostream &stream = std::cout) -> LogStream& {
-        static LogStream logStream = LogStream(colorize, displayedLogLevel, stream);
+    static auto create(EnvConfig const& envConfig) -> LogStream& {
+        static LogStream logStream = LogStream(envConfig);
         return logStream;
     }
 
@@ -132,13 +172,22 @@ public:
         return *this;
     }
 
-    auto operator << (LogEntry const& logEntry) -> std::ostream & {
-        bool logFilterFit = logLevelFilter(logEntry.logLevel);
+    auto operator << (LogEntry const& logEntry) -> LogStream & {
+        bool entryFiltered = !logLevelFilter(logEntry.logLevel);
 
-        if(logFilterFit){
-            // TODO: Colorize ???
-            stream  << logEntry.message;
+        if(entryFiltered) {
+            return *this;
         }
-        return stream;
+
+        envConfig.colorize
+            ? printColorizedEntryHeader(logEntry)
+            : printEntryHeader(logEntry);
+        stream << logEntry.message << std::endl;
+
+        return *this;
     }
+
+
+
+
 };

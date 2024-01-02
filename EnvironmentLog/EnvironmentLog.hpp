@@ -148,6 +148,21 @@ public:
         logStream << logEntry;
     }
 
+    auto success(std::string_view message,
+                 std::vector<std::string_view> const &arguments = {},
+                 std::optional<std::source_location> caller = std::nullopt) -> void {
+
+        const std::string info = interpolateArgs(message, arguments);
+
+        const LogEntry logEntry = {
+                .logLevel = LogLevel::SUCCESS,
+                .message =  info,
+                .location = caller
+        };
+
+        logStream << logEntry;
+    }
+
 
 // TODO:
 //  ~~skip logentry if loglevel is lower than loglevel of the log~~

@@ -9,58 +9,44 @@
 
 enum class LogLevel : std::uint8_t {
     /// Show all log levels
-    DEBUG   = 0b11111,
+    DEBUG   = 0b11'111'100,
     /// (Default) Show all log levels except debug
-    INFO    = 0b11110,
+    INFO    = 0b11'111'000,
     /// Show all log levels except debug and info
-    WARNING = 0b11100,
+    WARNING = 0b11'110'000,
     /// Show all log levels except debug, info and warning
-    ERROR   = 0b11000,
+    SUCCESS = 0b11'100'000,
+    /// Show all log levels except debug, info, warning and success
+    ERROR   = 0b11'000'000,
     /// Show only fatal log level
-    FATAL   = 0b10000
+    FATAL   = 0b10'000'000
 
 };
 
 inline std::ostream& operator<<(std::ostream& os, LogLevel const& logLevel){
     switch (logLevel) {
         case LogLevel::DEBUG:
-            os << "DEBUG";
+            os << " DEBUG ";
             break;
         case LogLevel::INFO:
-            os << "INFO";
+            os << " INFO  ";
             break;
         case LogLevel::WARNING:
             os << "WARNING";
             break;
+        case LogLevel::SUCCESS:
+            os << "SUCCESS";
+            break;
         case LogLevel::ERROR:
-            os << "ERROR";
+            os << " ERROR ";
             break;
         case LogLevel::FATAL:
-            os << "FATAL";
+            os << " FATAL ";
             break;
     }
     return os;
 }
 
-inline std::istream& operator>>(std::istream& is, LogLevel& logLevel){
-    std::string logLevelString;
-    is >> logLevelString;
-    if (logLevelString == "DEBUG") {
-        logLevel = LogLevel::DEBUG;
-    } else if (logLevelString == "INFO") {
-        logLevel = LogLevel::INFO;
-    } else if (logLevelString == "WARNING") {
-        logLevel = LogLevel::WARNING;
-    } else if (logLevelString == "ERROR") {
-        logLevel = LogLevel::ERROR;
-    } else if (logLevelString == "FATAL") {
-        logLevel = LogLevel::FATAL;
-    } else {
-        is.setstate(std::ios_base::failbit);
-    }
-
-    return is;
-}
 
 inline constexpr bool operator==(LogLevel const& lhs, LogLevel const& rhs){
     return static_cast<std::uint8_t>(lhs) == static_cast<std::uint8_t>(rhs);
@@ -83,18 +69,23 @@ namespace LogLevelHelper {
     inline constexpr std::string_view getColor(LogLevel const logLevel) {
         switch (logLevel) {
             case LogLevel::DEBUG:
-                return "\033[0;37m";
+                return "\033[48;2;141;134;201m";
             case LogLevel::INFO:
-                return "\033[0;32m";
+                return "\033[48;2;57;73;171m";  // INDIGO
             case LogLevel::WARNING:
-                return "\033[0;33m";
+                return "\033[48;2;190;90;0m";
+            case LogLevel::SUCCESS:
+                return "\033[48;2;40;170;60m";
             case LogLevel::ERROR:
-                return "\033[0;31m";
+                return "\033[48;2;180;20;0m";
             case LogLevel::FATAL:
-                return "\033[0;35m";
+                return "\033[48;2;160;35;20m";
         }
     }
 
     constexpr std::string_view COLOR_RESET = "\033[0m";
+    constexpr std::string_view BOLD = "\033[1m";
+    constexpr std::string_view THIN = "\033[2m";
+    constexpr std::string_view BORDER = "│";
 
 }

@@ -11,10 +11,8 @@ namespace test_space{
     class TestClass {
     public:
         TestClass() {
-            std::cout << "TestClass created" << std::endl;
-
             auto log = EnvironmentLog();
-            log.print("Hello ${0} ${1}",{"World", "!"},std::source_location::current());
+            log.print("Hello ${0} ${1}",{"World", "!"}, std::source_location::current());
         }
     };
 }

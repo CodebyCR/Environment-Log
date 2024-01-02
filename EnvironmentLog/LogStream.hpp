@@ -39,34 +39,44 @@ private:
 
     /// Source location
     inline auto addSourcelocation(std::source_location const& location) -> LogStream & {
-        const auto filename = std::filesystem::path(location.file_name()).filename();
-        stream << " | " << filename << ':' << location.line()
-               << " (" << location.line() << ':' << location.column() << ')';
+        const std::string filename = std::filesystem::path(location.file_name()).filename();
+        stream << ' ' << LogLevelHelper::BORDER << ' ' << filename << ':' << location.line() << ':' << location.column();
         return *this;
     }
 
     inline auto printEntryHeader(LogEntry const& logEntry) -> LogStream & {
-        stream << "[ " << logEntry.logLevel << ' ';
+        stream << LogLevelHelper::BORDER << ' ' << logEntry.logLevel << ' ';
         addTimestamp();
 
         if(logEntry.location.has_value()){
             addSourcelocation(logEntry.location.value());
         }
 
-        stream << " ] -> ";
+        stream << ' ' << LogLevelHelper::BORDER;
         return *this;
     }
 
     /// Colorized
     inline auto printColorizedEntryHeader(LogEntry const& logEntry) -> LogStream & {
-        stream << "[ " << LogLevelHelper::getColor(logEntry.logLevel) << logEntry.logLevel << ' ';
+        stream
+        << LogLevelHelper::BOLD
+        << LogLevelHelper::getColor(logEntry.logLevel)
+        << LogLevelHelper::BORDER
+        << ' '
+        << logEntry.logLevel
+        << ' ';
         addTimestamp();
 
         if(logEntry.location.has_value()){
             addSourcelocation(logEntry.location.value());
         }
 
-        stream << LogLevelHelper::COLOR_RESET << " ] -> ";
+        stream
+        << ' '
+        << LogLevelHelper::BORDER
+        << LogLevelHelper::COLOR_RESET
+        << LogLevelHelper::THIN
+        << ' ';
         return *this;
     }
 
@@ -166,9 +176,7 @@ public:
     }
 
     auto operator<<(LogLevel const logLevel) -> LogStream & {
-//        if (logLevelFilter(logLevel)) {
             stream << logLevel;
-//        }
         return *this;
     }
 
@@ -187,6 +195,10 @@ public:
         return *this;
     }
 
+//    auto operator << (std::filesystem::path const& path) -> LogStream & {
+//        stream << path;
+//        return *this;
+//    }
 
 
 

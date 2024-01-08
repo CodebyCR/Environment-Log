@@ -42,14 +42,14 @@ private:
 
 public:
 
-    explicit EnvironmentLog(EnvConfig const &envConfig = {
+    explicit EnvironmentLog(EnvConfig const& envConfig = {
             .logDirectory = std::filesystem::current_path() / "logs",
             .dateFormat = "%d. %b %Y",
             .timeFormat = "%T",
             .displayedLogLevel = LogLevel::INFO,
             .colorize = true,
             .stream = std::cout
-    }) : envConfig(envConfig), logPool(envConfig.logDirectory) {}
+    }) : envConfig(envConfig), logPool(envConfig) {}
 
     auto getLog(std::string_view logSubDirectory) -> std::optional<Log> {
         return logPool.getLog(logSubDirectory);

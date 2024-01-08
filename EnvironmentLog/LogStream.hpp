@@ -6,8 +6,10 @@
 
 #include "LogLevel.hpp"
 #include "LogEntry.hpp"
+#include "EnvConfig.hpp"
 
 #include <iostream>
+#include <fstream>
 
 class LogStream {
 private:
@@ -18,6 +20,10 @@ private:
     LogStream(EnvConfig const& envConfig):
             envConfig(envConfig),
             stream(envConfig.stream)  {}
+
+    LogStream(EnvConfig const& envConfig, std::ostream & ofstream):
+            envConfig(envConfig),
+            stream(ofstream){}
 
     /// LogLevel filter
     inline auto logLevelFilter(LogLevel logLevel) -> bool {
@@ -40,19 +46,22 @@ private:
     /// Source location
     inline auto addSourcelocation(std::source_location const& location) -> LogStream & {
         const std::string filename = std::filesystem::path(location.file_name()).filename();
-        stream << ' ' << LogLevelHelper::BORDER << ' ' << filename << ':' << location.line() << ':' << location.column();
+        stream << ' ' << filename << ':' << location.line() << ':' << location.column();
         return *this;
     }
 
     inline auto printEntryHeader(LogEntry const& logEntry) -> LogStream & {
-        stream << LogLevelHelper::BORDER << ' ' << logEntry.logLevel << ' ';
+        stream
+//        << LogLevelHelper::BORDER
+        << '|' << ' ' << logEntry.logLevel << ' ';
         addTimestamp();
 
         if(logEntry.location.has_value()){
             addSourcelocation(logEntry.location.value());
         }
 
-        stream << ' ' << LogLevelHelper::BORDER;
+        stream << ' ' << '|';
+//        LogLevelHelper::BORDER;
         return *this;
     }
 
@@ -61,7 +70,7 @@ private:
         stream
         << LogLevelHelper::BOLD
         << LogLevelHelper::getColor(logEntry.logLevel)
-        << LogLevelHelper::BORDER
+//        << LogLevelHelper::BORDER
         << ' '
         << logEntry.logLevel
         << ' ';
@@ -73,7 +82,7 @@ private:
 
         stream
         << ' '
-        << LogLevelHelper::BORDER
+//        << LogLevelHelper::BORDER
         << LogLevelHelper::COLOR_RESET
         << LogLevelHelper::THIN
         << ' ';
@@ -86,6 +95,11 @@ public:
     /// Singleton
     static auto create(EnvConfig const& envConfig) -> LogStream& {
         static LogStream logStream = LogStream(envConfig);
+        return logStream;
+    }
+
+    static auto create(EnvConfig const& envConfig, std::ostream &ofstream) -> LogStream& {
+        static LogStream logStream = LogStream(envConfig, ofstream);
         return logStream;
     }
 
@@ -195,11 +209,17 @@ public:
         return *this;
     }
 
-//    auto operator << (std::filesystem::path const& path) -> LogStream & {
-//        stream << path;
-//        return *this;
-//    }
+    auto is_open() -> bool {
+        return stream.good();
+    }
 
-
+    auto operator << (std::filesystem::path const& path) -> LogStream & {
+        stream << path;
+//        std::ofstream ofs(path);
+//        if(ofs.is_open()){
+//            stream = ofs;
+//        }
+        return *this;
+    }
 
 };

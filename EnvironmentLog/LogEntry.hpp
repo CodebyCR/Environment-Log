@@ -9,6 +9,7 @@
 #include <iostream>
 #include <string_view>
 #include <source_location>
+#include <optional>
 
 struct LogEntry{
 public:

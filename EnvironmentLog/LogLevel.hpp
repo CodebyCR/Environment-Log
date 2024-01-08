@@ -69,17 +69,17 @@ namespace LogLevelHelper {
     inline constexpr std::string_view getColor(LogLevel const logLevel) {
         switch (logLevel) {
             case LogLevel::DEBUG:
-                return "\033[48;2;141;134;201m";
+                return "\033[38;2;141;134;201m";
             case LogLevel::INFO:
-                return "\033[48;2;57;73;171m";  // INDIGO
+                return "\033[38;2;77;83;171m";  // INDIGO
             case LogLevel::WARNING:
-                return "\033[48;2;190;90;0m";
+                return "\033[38;2;190;90;0m";
             case LogLevel::SUCCESS:
-                return "\033[48;2;40;170;60m";
+                return "\033[38;2;40;170;60m";
             case LogLevel::ERROR:
-                return "\033[48;2;180;20;0m";
+                return "\033[38;2;180;20;0m";
             case LogLevel::FATAL:
-                return "\033[48;2;160;35;20m";
+                return "\033[38;2;160;35;20m";
         }
     }
 

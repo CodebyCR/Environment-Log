@@ -67,6 +67,18 @@ int main() {
 
     log.print("${0}Test bold print${1}", LogLevelHelper::BOLD, LogLevelHelper::THIN);
 
+
+    log.createLog("optionalFileTest");
+    auto optionalFileTest = log.getLog("optionalFileTest");
+    if(optionalFileTest.has_value()){
+        log.print("optionalFileTest created");
+        optionalFileTest.value().print("optionalFileTest - are this in the log file?");
+    } else {
+        log.print("optionalFileTest not created");
+    }
+
+    log.print("optionalFileTest closed");
+
 //    auto* log = new Log("testLog");
 
 

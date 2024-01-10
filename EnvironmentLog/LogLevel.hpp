@@ -7,7 +7,7 @@
 #include <iostream>
 #include <cstdint>
 
-enum class LogLevel : std::uint8_t {
+enum class LogLevel: std::uint8_t {
     /// Show all log levels
     DEBUG   = 0b11'111'100,
     /// (Default) Show all log levels except debug
@@ -20,27 +20,27 @@ enum class LogLevel : std::uint8_t {
     ERROR   = 0b11'000'000,
     /// Show only fatal log level
     FATAL   = 0b10'000'000
-
 };
 
 inline std::ostream& operator<<(std::ostream& os, LogLevel const& logLevel){
     switch (logLevel) {
-        case LogLevel::DEBUG:
+        using enum LogLevel;
+        case DEBUG:
             os << " DEBUG ";
             break;
-        case LogLevel::INFO:
+        case INFO:
             os << " INFO  ";
             break;
-        case LogLevel::WARNING:
+        case WARNING:
             os << "WARNING";
             break;
-        case LogLevel::SUCCESS:
+        case SUCCESS:
             os << "SUCCESS";
             break;
-        case LogLevel::ERROR:
+        case ERROR:
             os << " ERROR ";
             break;
-        case LogLevel::FATAL:
+        case FATAL:
             os << " FATAL ";
             break;
     }
@@ -48,39 +48,42 @@ inline std::ostream& operator<<(std::ostream& os, LogLevel const& logLevel){
 }
 
 
-inline constexpr bool operator==(LogLevel const& lhs, LogLevel const& rhs){
+constexpr bool operator==(LogLevel const& lhs, LogLevel const& rhs){
     return static_cast<std::uint8_t>(lhs) == static_cast<std::uint8_t>(rhs);
 }
 
-inline constexpr LogLevel operator|(LogLevel const& lhs, LogLevel const& rhs){
-    return static_cast<LogLevel>(static_cast<std::uint8_t>(lhs) | static_cast<std::uint8_t>(rhs));
+constexpr LogLevel operator|(LogLevel const& lhs, LogLevel const& rhs){
+    return static_cast<LogLevel>(static_cast<std::byte>(lhs) | static_cast<std::byte>(rhs));
 }
 
-inline constexpr auto operator >= (LogLevel lhs, LogLevel rhs) -> bool {
+constexpr auto operator >= (LogLevel lhs, LogLevel rhs) -> bool {
     return static_cast<std::uint8_t>(lhs) >= static_cast<std::uint8_t>(rhs);
 }
 
-inline constexpr auto operator <= (LogLevel lhs, LogLevel rhs) -> bool {
+constexpr auto operator <= (LogLevel lhs, LogLevel rhs) -> bool {
     return static_cast<std::uint8_t>(lhs) <= static_cast<std::uint8_t>(rhs);
 }
 
 namespace LogLevelHelper {
 
-    inline constexpr std::string_view getColor(LogLevel const logLevel) {
+    constexpr std::string_view getColor(LogLevel const logLevel) {
         switch (logLevel) {
-            case LogLevel::DEBUG:
+            using enum LogLevel;
+            case DEBUG:
                 return "\033[38;2;141;134;201m";
-            case LogLevel::INFO:
+            case INFO:
                 return "\033[38;2;77;83;171m";  // INDIGO
-            case LogLevel::WARNING:
+            case WARNING:
                 return "\033[38;2;190;90;0m";
-            case LogLevel::SUCCESS:
+            case SUCCESS:
                 return "\033[38;2;40;170;60m";
-            case LogLevel::ERROR:
+            case ERROR:
                 return "\033[38;2;180;20;0m";
-            case LogLevel::FATAL:
-                return "\033[38;2;160;35;20m";
+            case FATAL:
+                return "\x1B[38;2;160;35;20m";
         }
+
+        return "\033[0m";
     }
 
     constexpr std::string_view COLOR_RESET = "\033[0m";

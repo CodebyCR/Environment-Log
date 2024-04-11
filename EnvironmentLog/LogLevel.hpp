@@ -26,10 +26,10 @@ enum class LogLevel : std::uint8_t {
 inline std::ostream& operator<<(std::ostream& os, LogLevel const& logLevel){
     switch (logLevel) {
         case LogLevel::DEBUG:
-            os << " DEBUG ";
+            os << "DEBUG  ";
             break;
         case LogLevel::INFO:
-            os << " INFO  ";
+            os << "INFO   ";
             break;
         case LogLevel::WARNING:
             os << "WARNING";
@@ -38,10 +38,10 @@ inline std::ostream& operator<<(std::ostream& os, LogLevel const& logLevel){
             os << "SUCCESS";
             break;
         case LogLevel::ERROR:
-            os << " ERROR ";
+            os << "ERROR  ";
             break;
         case LogLevel::FATAL:
-            os << " FATAL ";
+            os << "FATAL  ";
             break;
     }
     return os;
@@ -81,6 +81,7 @@ namespace LogLevelHelper {
             case LogLevel::FATAL:
                 return "\033[38;2;160;35;20m";
         }
+        return "";
     }
 
     constexpr std::string_view COLOR_RESET = "\033[0m";

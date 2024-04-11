@@ -10,6 +10,8 @@
 
 #include <iostream>
 #include <fstream>
+#include <utility>
+#include <format>
 
 class LogStream {
 private:
@@ -17,16 +19,16 @@ private:
     std::ostream &stream;
 
 
-    LogStream(EnvConfig const& envConfig):
+    explicit LogStream(EnvConfig const& envConfig):
             envConfig(envConfig),
             stream(envConfig.stream)  {}
 
-    LogStream(EnvConfig const& envConfig, std::ostream & ofstream):
-            envConfig(envConfig),
+    LogStream(EnvConfig envConfig, std::ostream & ofstream):
+            envConfig(std::move(envConfig)),
             stream(ofstream){}
 
     /// LogLevel filter
-    inline auto logLevelFilter(LogLevel logLevel) -> bool {
+    [[nodiscard]] inline auto logLevelFilter(LogLevel logLevel) const -> bool {
         return logLevel <= envConfig.displayedLogLevel;
     }
 
@@ -37,7 +39,7 @@ private:
         const std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
         /// now as dd. MMM yyyy hh:mm:ss
         const time_t nowTime = std::chrono::system_clock::to_time_t(now);
-        const auto totalDateFormat = "| " + envConfig.timeFormat +  " | " + envConfig.dateFormat;
+        const auto totalDateFormat = envConfig.dateFormat + " | " + envConfig.timeFormat +  " | " ;
 
         stream << std::put_time(localtime(&nowTime), totalDateFormat.c_str());
         return *this;
@@ -46,15 +48,17 @@ private:
     /// Source location
     inline auto addSourcelocation(std::source_location const& location) -> LogStream & {
         const std::string filename = std::filesystem::path(location.file_name()).filename();
-        stream << ' ' << filename << ':' << location.line() << ':' << location.column();
+        stream << std::format( "  {}:{}:{}", filename, location.line(), location.column());
         return *this;
     }
 
     inline auto printEntryHeader(LogEntry const& logEntry) -> LogStream & {
         stream
 //        << LogLevelHelper::BORDER
-        << '|' << ' ' << logEntry.logLevel << ' ';
+        << '|';
         addTimestamp();
+
+        stream << logEntry.logLevel;
 
         if(logEntry.location.has_value()){
             addSourcelocation(logEntry.location.value());
@@ -69,12 +73,12 @@ private:
     inline auto printColorizedEntryHeader(LogEntry const& logEntry) -> LogStream & {
         stream
         << LogLevelHelper::BOLD
-        << LogLevelHelper::getColor(logEntry.logLevel)
+        << LogLevelHelper::getColor(logEntry.logLevel);
 //        << LogLevelHelper::BORDER
-        << ' '
-        << logEntry.logLevel
-        << ' ';
+
         addTimestamp();
+
+        stream << logEntry.logLevel;
 
         if(logEntry.location.has_value()){
             addSourcelocation(logEntry.location.value());
@@ -109,17 +113,17 @@ public:
         return *this;
     }
 
-    auto operator<<(std::ostream &(*f)(std::ostream &)) -> LogStream & {
+     auto operator<<(std::ostream const&(*f)(std::ostream &)) -> LogStream & {
         stream << f;
         return *this;
     }
 
-    auto operator<<(std::ios &(*f)(std::ios &)) -> LogStream & {
+    auto operator<<(std::ios const&(*f)(std::ios &)) -> LogStream & {
         stream << f;
         return *this;
     }
 
-    auto operator<<(std::ios_base &(*f)(std::ios_base &)) -> LogStream & {
+    auto operator<<(std::ios_base const&(*f)(std::ios_base &)) -> LogStream & {
         stream << f;
         return *this;
     }

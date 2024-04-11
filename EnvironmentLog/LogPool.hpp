@@ -21,7 +21,7 @@ private:
 
     /// get file output stream from filepath
     /// @param logSubDirectory
-    auto getLogStream(std::string_view logSubDirectory) -> std::optional<std::ofstream> {
+    [[nodiscard]] auto getLogStream(std::string_view logSubDirectory) const -> std::optional<std::ofstream> {
         const auto logPath = envConfig.logDirectory / logSubDirectory;
         if (!std::filesystem::exists(logPath)) {
             return std::nullopt;

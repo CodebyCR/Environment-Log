@@ -1,4 +1,11 @@
-# Environment Log
+<h1 align="center">Environment Log</h1>
+
+<div align="center">
+    <img height="28" src="https://img.shields.io/badge/C%2B%2B-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white" alt="Logo" >
+    <img height="28" src="https://img.shields.io/badge/CMake-064F8C?style=for-the-badge&logo=cmake&logoColor=white" alt="Logo">
+    <img height="28" src="https://img.shields.io/badge/SonarLint-CB2029?style=for-the-badge&logo=sonarlint&logoColor=white" alt="Logo">
+    <h6><em>One log solution for the whole environment.</em></h6>
+</div>
 
 ## Example Output
 

@@ -49,6 +49,9 @@ private:
     inline auto addSourcelocation(std::source_location const& location) -> LogStream & {
         const std::string filename = std::filesystem::path(location.file_name()).filename();
         stream << std::format( "  {}:{}:{}", filename, location.line(), location.column());
+//        const auto filename = std::filesystem::path(location.file_name()).filename();
+//        const std::string filenameString = filename.string(); // Compiler inconsistent MinGW / Apple Clang
+//        stream << ' ' << filename << ':' << location.line() << ':' << location.column();
         return *this;
     }
 
@@ -113,7 +116,7 @@ public:
         return *this;
     }
 
-     auto operator<<(std::ostream const&(*f)(std::ostream &)) -> LogStream & {
+    auto operator<<(std::ostream const&(*f)(std::ostream &)) -> LogStream & {
         stream << f;
         return *this;
     }

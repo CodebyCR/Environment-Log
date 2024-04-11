@@ -43,7 +43,6 @@ int main() {
 
     log.print("test with one");
 
-    log.print(__FILE_NAME__);
 
     log.error("test error");
 
@@ -68,14 +67,14 @@ int main() {
     log.print("${0}Test bold print${1}", LogLevelHelper::BOLD, LogLevelHelper::THIN);
 
 
-    log.createLog("optionalFileTest");
-    auto optionalFileTest = log.getLog("optionalFileTest");
-    if(optionalFileTest.has_value()){
-        log.print("optionalFileTest created");
-        optionalFileTest.value().print("optionalFileTest - are this in the log file?");
-    } else {
-        log.print("optionalFileTest not created");
-    }
+//    log.createLog("optionalFileTest");
+//    auto optionalFileTest = log.getLog("optionalFileTest");
+//    if(optionalFileTest.has_value()){
+//        log.print("optionalFileTest created");
+//        optionalFileTest.value().print("optionalFileTest - are this in the log file?");
+//    } else {
+//        log.print("optionalFileTest not created");
+//    }
 
     log.print("optionalFileTest closed");
 
